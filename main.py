@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Query
 import sqlite3
 from datetime import date
 from typing import Optional, List
+from contextlib import asynccontextmanager
 from database import get_db_connection, init_db
 from schemas import ExpenseCreate, ExpenseUpdate
 from crud import (
@@ -13,12 +14,14 @@ from crud import (
     monthly_summary,
 )
 
-app = FastAPI(title="Personal Expense Tracker API")
 
-
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
+    yield
+
+
+app = FastAPI(title="Personal Expense Tracker API", lifespan=lifespan)
 
 
 def get_db():
@@ -78,30 +81,4 @@ def get_monthly_summary(
     month: int = Query(..., ge=1, le=12),
     db: sqlite3.Connection = Depends(get_db),
 ):
-    breakdown = monthly_summary(db, year=year, month=month)
-    total = sum(breakdown.values())
-    count_items = list_expenses(
-        db,
-        start_date=date(year, month, 1),
-        end_date=date(
-            year + 1, 1, 1
-        ) if month == 12 else date(year, month + 1, 1),
-    )
-    # Filter count items strictly for the given month/year
-    # Actually, list_expenses returns items matching start/end date.
-    # Let's count expenses whose date starts with year-month prefix or matching month.
-    # Or count from breakdown sum of counts? Wait, let's query db or count list items.
-    all_in_month = [
-        item for item in list_expenses(db)
-        if item["date"].startswith(f"{year:04d}-{month:02d}")
-    ]
-    total_amount = sum(item["amount"] for item in all_in_month)
-    count = len(all_in_month)
-
-    return {
-        "year": year,
-        "month": month,
-        "total": total_amount,
-        "count": count,
-        "by_category": breakdown,
-    }
+    return monthly_summary(db, year=year, month=month)

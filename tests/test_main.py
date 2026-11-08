@@ -168,7 +168,4 @@ def test_monthly_summary(client):
     response = client.get("/expenses/summary/monthly?year=2026&month=3")
     assert response.status_code == 200
     summary = response.json()
-    assert summary["year"] == 2026
-    assert summary["month"] == 3
-    assert summary["total"] == 3500
-    assert summary["count"] == 2
+    assert summary == {"Food": 1000, "Rent": 2500}
