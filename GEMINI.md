@@ -4,12 +4,20 @@
 Personal Expense Tracker API built with FastAPI and SQLite to track income and expenses.
 
 ## Tech Stack
-- Python 3.12
+- Python 3.13
 - FastAPI
 - SQLite
 - pytest
 
+## Decisions
+- Use plain sqlite3 with raw SQL. No SQLAlchemy, no ORM, no sessions.
+- Store amount as an integer in paise (smallest currency unit).
+- Use PATCH for partial updates, not PUT.
+- Use Pydantic v2.
+- Validation: amount > 0, category non-empty, valid date. Return 404 for missing expenses, 422 for invalid input.
+
 ## Engineering Rules & Conventions
+- **Virtual Environment (.venv):** Always use the project's `.venv` virtual environment for running python, pytest, and uvicorn (`.venv\Scripts\python`, `.venv\Scripts\pytest`, `.venv\Scripts\uvicorn`).
 - **Test-Driven Development:** Always write tests before implementing features or bug fixes.
 - **Modularity:** Keep functions small, focused, and single-responsibility.
 - **Environment Protection:** Never edit `.env` files directly or commit secrets.
