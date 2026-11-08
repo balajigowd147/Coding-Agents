@@ -36,17 +36,31 @@ class ExpenseUpdate(BaseModel):
     date: Optional[datetime.date] = None
     note: Optional[str] = None
 
+    @field_validator("amount", mode="before")
+    @classmethod
+    def validate_amount(cls, v: Any) -> Optional[int]:
+        if v is None:
+            raise ValueError("Amount cannot be null")
+        return v
+
     @field_validator("category", mode="before")
     @classmethod
-    def validate_and_strip_category(cls, v: Any) -> Optional[str]:
+    def validate_and_strip_category(cls, v: Any) -> str:
         if v is None:
-            return None
+            raise ValueError("Category cannot be null")
         if not isinstance(v, str):
             raise ValueError("Category must be a string")
         stripped = v.strip()
         if not stripped:
             raise ValueError("Category cannot be empty")
         return stripped
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def validate_date(cls, v: Any) -> datetime.date:
+        if v is None:
+            raise ValueError("Date cannot be null")
+        return v
 
     @field_validator("note", mode="before")
     @classmethod

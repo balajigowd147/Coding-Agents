@@ -169,3 +169,61 @@ def test_monthly_summary(client):
     assert response.status_code == 200
     summary = response.json()
     assert summary == {"Food": 1000, "Rent": 2500}
+
+
+def test_patch_expense_null_amount(client):
+    create_res = client.post(
+        "/expenses/",
+        json={"amount": 500, "category": "Food", "date": "2026-03-01"},
+    )
+    expense_id = create_res.json()["id"]
+
+    response = client.patch(
+        f"/expenses/{expense_id}",
+        json={"amount": None},
+    )
+    assert response.status_code == 422
+
+
+def test_patch_expense_null_category(client):
+    create_res = client.post(
+        "/expenses/",
+        json={"amount": 500, "category": "Food", "date": "2026-03-01"},
+    )
+    expense_id = create_res.json()["id"]
+
+    response = client.patch(
+        f"/expenses/{expense_id}",
+        json={"category": None},
+    )
+    assert response.status_code == 422
+
+
+def test_patch_expense_null_date(client):
+    create_res = client.post(
+        "/expenses/",
+        json={"amount": 500, "category": "Food", "date": "2026-03-01"},
+    )
+    expense_id = create_res.json()["id"]
+
+    response = client.patch(
+        f"/expenses/{expense_id}",
+        json={"date": None},
+    )
+    assert response.status_code == 422
+
+
+def test_patch_expense_null_note(client):
+    create_res = client.post(
+        "/expenses/",
+        json={"amount": 500, "category": "Food", "date": "2026-03-01", "note": "Lunch"},
+    )
+    expense_id = create_res.json()["id"]
+
+    response = client.patch(
+        f"/expenses/{expense_id}",
+        json={"note": None},
+    )
+    assert response.status_code == 200
+    assert response.json()["note"] is None
+
