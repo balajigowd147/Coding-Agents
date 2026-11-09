@@ -1,7 +1,7 @@
 # Personal Expense Tracker API
 
 ## Overview
-A lightweight REST API built with FastAPI and SQLite for tracking personal income and expenses.
+A lightweight REST API built with FastAPI and SQLite for tracking personal expenses.
 
 ## Features
 - Create, read, update (PATCH), and delete expenses
