@@ -12,6 +12,7 @@ from llm.helpers import (
     monthly_summary,
     build_expense,
     IntermediateExpense,
+    get_api_key,
 )
 
 
@@ -119,4 +120,24 @@ def test_monthly_summary_validation():
         monthly_summary(2026, 0)
     with pytest.raises(ValueError):
         monthly_summary(2026, 13)
+
+
+def test_get_api_key_missing(monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    with pytest.raises(ValueError) as exc_info:
+        get_api_key()
+    assert "GEMINI_API_KEY" in str(exc_info.value)
+
+
+def test_get_api_key_present(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-test-value")
+    assert get_api_key() == "fake-test-value"
+
+
+def test_get_api_key_empty(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "")
+    with pytest.raises(ValueError):
+        get_api_key()
+
+
 

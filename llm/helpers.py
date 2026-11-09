@@ -1,3 +1,4 @@
+import os
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 from typing import Optional
@@ -5,6 +6,13 @@ from pydantic import BaseModel
 import database
 from crud import monthly_summary as crud_monthly_summary
 from schemas import ExpenseCreate
+
+
+def get_api_key() -> str:
+    key = os.environ.get("GEMINI_API_KEY")
+    if not key:
+        raise ValueError("GEMINI_API_KEY environment variable is not set.")
+    return key
 
 
 class IntermediateExpense(BaseModel):
