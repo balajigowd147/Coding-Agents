@@ -13,6 +13,7 @@ from llm.helpers import (
     build_expense,
     IntermediateExpense,
     get_api_key,
+    parse_expense_response,
 )
 
 
@@ -138,6 +139,63 @@ def test_get_api_key_empty(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "")
     with pytest.raises(ValueError):
         get_api_key()
+
+
+def test_parse_expense_response_valid():
+    json_text = '{"amount": 19.99, "category": "Food", "date": "2026-11-08", "note": "lunch"}'
+    expense = parse_expense_response(json_text)
+    assert isinstance(expense, ExpenseCreate)
+    assert expense.amount == 1999
+    assert expense.category == "Food"
+    assert expense.date == date(2026, 11, 8)
+    assert expense.note == "lunch"
+
+
+def test_parse_expense_response_code_fence():
+    fenced_text = '```json\n{"amount": 12.50, "category": "Travel", "date": "2026-11-08", "note": "bus"}\n```'
+    expense = parse_expense_response(fenced_text)
+    assert isinstance(expense, ExpenseCreate)
+    assert expense.amount == 1250
+    assert expense.category == "Travel"
+
+
+def test_parse_expense_response_invalid_date():
+    json_text = '{"amount": 19.99, "category": "Food", "date": "2026-13-45", "note": "lunch"}'
+    with pytest.raises(ValidationError):
+        parse_expense_response(json_text)
+
+
+def test_parse_expense_response_missing_amount():
+    json_text = '{"category": "Food", "date": "2026-11-08", "note": "lunch"}'
+    with pytest.raises((ValidationError, ValueError)):
+        parse_expense_response(json_text)
+
+
+def test_parse_expense_response_zero_amount():
+    json_text = '{"amount": 0, "category": "Food", "date": "2026-11-08", "note": "lunch"}'
+    with pytest.raises((ValidationError, ValueError)):
+        parse_expense_response(json_text)
+
+
+def test_parse_expense_response_negative_amount():
+    json_text = '{"amount": -10.00, "category": "Food", "date": "2026-11-08", "note": "refund"}'
+    with pytest.raises((ValidationError, ValueError)):
+        parse_expense_response(json_text)
+
+
+def test_parse_expense_response_not_object():
+    for non_obj in ['[]', 'null', '"string"', '123']:
+        with pytest.raises(ValueError):
+            parse_expense_response(non_obj)
+
+
+def test_parse_expense_response_invalid_json():
+    not_json = "this is not json at all"
+    with pytest.raises(ValueError) as exc_info:
+        parse_expense_response(not_json)
+    assert "json" in str(exc_info.value).lower()
+
+
 
 
 

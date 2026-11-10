@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
@@ -41,6 +42,28 @@ def build_expense(parsed: IntermediateExpense) -> ExpenseCreate:
         date=parsed.date,
         note=parsed.note,
     )
+
+
+def parse_expense_response(text: str) -> ExpenseCreate:
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise ValueError("Model response was not valid JSON")
+
+    if not isinstance(data, dict):
+        raise ValueError("Model response must be a JSON object")
+
+    parsed = IntermediateExpense(**data)
+    return build_expense(parsed)
 
 
 def monthly_summary(year: int, month: int) -> dict:
