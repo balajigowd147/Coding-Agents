@@ -196,6 +196,12 @@ def test_parse_expense_response_invalid_json():
     assert "json" in str(exc_info.value).lower()
 
 
+def test_parse_expense_response_empty():
+    for empty_val in [None, "", "   "]:
+        with pytest.raises(ValueError, match="Model response was empty"):
+            parse_expense_response(empty_val)
+
+
 
 
 

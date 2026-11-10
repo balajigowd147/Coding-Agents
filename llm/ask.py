@@ -1,6 +1,8 @@
+import os
 import sys
 from google import genai
 from google.genai import types
+from google.genai import errors
 from pydantic import ValidationError
 from llm.helpers import (
     get_api_key,
@@ -62,7 +64,18 @@ def main():
             print(response.text)
         elif command == "b":
             handle_b(text)
-    except (ValueError, ValidationError) as e:
+    except errors.APIError as e:
+        msg = getattr(e, "message", None) or str(e)
+        api_key_val = os.environ.get("GEMINI_API_KEY")
+        if api_key_val and api_key_val in msg:
+            msg = msg.replace(api_key_val, "[REDACTED]")
+        print(f"Gemini request failed: {msg}")
+        sys.exit(1)
+    except ValidationError as e:
+        first_msg = e.errors()[0]["msg"] if e.errors() else str(e)
+        print(f"Invalid expense: {first_msg}")
+        sys.exit(1)
+    except ValueError as e:
         print(e)
         sys.exit(1)
 

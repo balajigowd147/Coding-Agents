@@ -44,8 +44,10 @@ def build_expense(parsed: IntermediateExpense) -> ExpenseCreate:
     )
 
 
-def parse_expense_response(text: str) -> ExpenseCreate:
-    cleaned = text.strip()
+def parse_expense_response(text: Optional[str]) -> ExpenseCreate:
+    if not text or not str(text).strip():
+        raise ValueError("Model response was empty")
+    cleaned = str(text).strip()
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
         if lines and lines[0].startswith("```"):

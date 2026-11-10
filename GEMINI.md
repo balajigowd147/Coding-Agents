@@ -22,6 +22,7 @@ Personal Expense Tracker API built with FastAPI and SQLite to track income and e
 - **Modularity:** Keep functions small, focused, and single-responsibility.
 - **Environment Protection:** Never edit `.env` files directly or commit secrets.
 - **Dependencies:** Always ask the user before installing any new packages.
+- **Targeted Edits:** Prefer small targeted edits over rewriting whole files. Do exactly the step requested, then stop and wait.
 
 ## Commands
 - **Create Virtual Environment:**
