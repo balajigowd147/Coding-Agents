@@ -78,3 +78,20 @@ def test_main_validation_error_short_message(monkeypatch, capsys):
     output = captured.out.strip()
     assert output.startswith("Invalid expense:")
     assert len(output.splitlines()) == 1
+
+
+def test_tools_definition():
+    from llm.ask import TOOLS
+    tool_names = {t.__name__ for t in TOOLS}
+    assert tool_names == {"monthly_summary"}
+
+
+def test_command_c_handler(monkeypatch, capsys):
+    canned_text = "Your total spending is 150.00 rupees."
+    monkeypatch.setattr(llm.ask, "call_gemini_with_tools", lambda prompt, tools: canned_text)
+
+    llm.ask.handle_c("What was my food spending?")
+
+    captured = capsys.readouterr()
+    assert "150.00 rupees" in captured.out
+
