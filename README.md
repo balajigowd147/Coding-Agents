@@ -33,6 +33,15 @@ A lightweight REST API built with FastAPI and SQLite for tracking personal expen
 | DELETE | `/expenses/{id}` | Delete an expense |
 | GET | `/expenses/summary/monthly` | Get monthly category breakdown |
 
+## LLM Script (`llm/ask.py`)
+- **Install:** `.venv\Scripts\python -m pip install -r llm/requirements.txt`
+- **Config:** Set `GEMINI_API_KEY` as an environment variable (never in a file).
+- **Commands:**
+  - `a`: `python -m llm.ask a "Hello"` (query LLM)
+  - `b`: `python -m llm.ask b "Spent 500 on food"` (parses expense to JSON, prints only and never saves)
+  - `c`: `python -m llm.ask c "Show monthly summary"` (uses one read-only tool: `monthly_summary`)
+- **Design Decisions:** Model output is untrusted and validated; rupees converted to paise in code.
+
 ## Design Decisions
 - Amounts stored as integer paise (smallest currency unit) to avoid floating-point errors.
 - Plain `sqlite3` with raw SQL queries and parameterized `?` placeholders (no ORM).
