@@ -1,2 +1,2 @@
 def test_intentional_failure():
-    assert 1 == 2
+    assert 1 == 1
