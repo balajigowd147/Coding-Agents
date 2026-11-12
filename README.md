@@ -1,4 +1,5 @@
 # Personal Expense Tracker API
+![CI](https://github.com/balajigowd147/expense-tracker-api/actions/workflows/ci.yml/badge.svg)
 
 ## Overview
 A lightweight REST API built with FastAPI and SQLite for tracking personal expenses.
