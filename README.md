@@ -20,6 +20,14 @@ A lightweight REST API built with FastAPI and SQLite for tracking personal expen
 - Start server: `uvicorn main:app --reload`
 - Interactive API Docs: `http://127.0.0.1:8000/docs`
 
+## Run with Docker
+- Build image: `docker build -t expense-api .`
+- Run container: `docker run -d --name expense-api -p 8000:8000 -v expense-data:/data expense-api`
+- API Docs: `http://127.0.0.1:8000/docs`
+- Stop and remove: `docker rm -f expense-api`
+- The database lives in the named volume `expense-data` and survives container removal.
+- The image contains no API keys and does not include the `llm/` script.
+
 ## Run Tests
 - Run test suite: `.venv\Scripts\pytest`
 
