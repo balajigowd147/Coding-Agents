@@ -1,0 +1,17 @@
+.git
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+tests/
+llm/
+.env
+*.db
+*.sqlite3
+README.md
+pytest.ini
+.gemini/
+.vscode/
+GEMINI.md
