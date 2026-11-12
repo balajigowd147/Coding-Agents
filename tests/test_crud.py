@@ -9,6 +9,7 @@ from crud import (
     update_expense,
     delete_expense,
     monthly_summary,
+    build_update_sql,
 )
 
 
@@ -156,3 +157,24 @@ def test_monthly_summary_boundary_dates(db_conn):
 def test_monthly_summary_no_expenses(db_conn):
     summary = monthly_summary(db_conn, year=2026, month=12)
     assert summary == {}
+
+
+def test_build_update_sql_valid():
+    data = {"amount": 500, "category": "Food"}
+    set_clause, values = build_update_sql(data)
+    assert "amount = ?" in set_clause
+    assert "category = ?" in set_clause
+    assert values == [500, "Food"]
+
+
+def test_build_update_sql_invalid_column_id():
+    data = {"id": 1, "amount": 500}
+    with pytest.raises(ValueError, match="Unknown column: id"):
+        build_update_sql(data)
+
+
+def test_build_update_sql_invalid_column_injection():
+    data = {"amount = 0, category": 500}
+    with pytest.raises(ValueError, match="Unknown column: amount = 0, category"):
+        build_update_sql(data)
+

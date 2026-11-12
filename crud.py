@@ -16,6 +16,22 @@ def create_expense(conn: sqlite3.Connection, expense: ExpenseCreate) -> dict:
     return get_expense(conn, expense_id)
 
 
+UPDATABLE_COLUMNS = ("amount", "category", "date", "note")
+
+
+def build_update_sql(update_data: Dict[str, Any]) -> tuple[str, List[Any]]:
+    set_clauses = []
+    params: List[Any] = []
+    for field, value in update_data.items():
+        if field not in UPDATABLE_COLUMNS:
+            raise ValueError(f"Unknown column: {field}")
+        if field == "date" and isinstance(value, date):
+            value = value.isoformat()
+        set_clauses.append(f"{field} = ?")
+        params.append(value)
+    return ", ".join(set_clauses), params
+
+
 def get_expense(conn: sqlite3.Connection, expense_id: int) -> Optional[dict]:
     cursor = conn.cursor()
     cursor.execute("SELECT id, amount, category, date, note FROM expenses WHERE id = ?", (expense_id,))
@@ -66,17 +82,10 @@ def update_expense(
     if not update_data:
         return existing
 
-    set_clauses = []
-    params: List[Any] = []
-
-    for field, value in update_data.items():
-        if field == "date" and isinstance(value, date):
-            value = value.isoformat()
-        set_clauses.append(f"{field} = ?")
-        params.append(value)
-
+    set_clause, params = build_update_sql(update_data)
     params.append(expense_id)
-    query = f"UPDATE expenses SET {', '.join(set_clauses)} WHERE id = ?"
+    # Column names come from an allowlist and the values use ? placeholders
+    query = f"UPDATE expenses SET {set_clause} WHERE id = ?"  # nosec B608
 
     cursor = conn.cursor()
     cursor.execute(query, params)
