@@ -48,3 +48,66 @@ jobs:
 
       - run: python -m bandit -r main.py crud.py database.py schemas.py llm
 
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build Docker image
+        run: docker build -t expense-api .
+
+      - name: Run container
+        run: docker run -d --name expense-api -p 8000:8000 expense-api
+
+      - name: Wait for API
+        run: |
+          for i in {1..30}; do
+            if curl -sf -o /dev/null --max-time 2 http://127.0.0.1:8000/docs; then
+              echo "API is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to start"
+          exit 1
+
+      - name: Check non-root user
+        run: |
+          USER_ID=$(docker exec expense-api id -u)
+          if [ "$USER_ID" = "0" ]; then
+            echo "Error: Container is running as root (uid 0)"
+            exit 1
+          fi
+          echo "Container is running as non-root user (uid $USER_ID)"
+
+      - name: Create expense (POST)
+        run: |
+          HTTP_CODE=$(curl --max-time 2 -s -o response.json -w "%{http_code}" -X POST http://127.0.0.1:8000/expenses/ \
+            -H "Content-Type: application/json" \
+            -d '{"amount":15000,"category":"Food","date":"2026-11-11","note":"ci"}')
+          echo "HTTP Status: $HTTP_CODE"
+          cat response.json
+          if [ "$HTTP_CODE" -ne 201 ]; then
+            exit 1
+          fi
+
+      - name: List expenses (GET)
+        run: |
+          RESPONSE=$(curl --max-time 2 -s http://127.0.0.1:8000/expenses/)
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q "Food"; then
+            echo "Found Food in response"
+          else
+            echo "Food not found in response"
+            exit 1
+          fi
+
+      - name: Print logs on failure
+        if: failure()
+        run: docker logs expense-api
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f expense-api || true
