@@ -12,9 +12,16 @@ def test_expense_create_valid():
         note="Dinner"
     )
     assert expense.amount == 1000
-    assert expense.category == "Food"
+    assert expense.category == "food"
     assert expense.date == date(2026, 3, 30)
     assert expense.note == "Dinner"
+
+
+def test_expense_create_normalization_food_and_padded():
+    e1 = ExpenseCreate(amount=100, category="Food", date="2026-03-30")
+    e2 = ExpenseCreate(amount=100, category=" FOOD ", date="2026-03-30")
+    assert e1.category == "food"
+    assert e2.category == "food"
 
 
 def test_expense_create_valid_no_note():
@@ -24,7 +31,7 @@ def test_expense_create_valid_no_note():
         date="2026-03-31"
     )
     assert expense.amount == 500
-    assert expense.category == "Transport"
+    assert expense.category == "transport"
     assert expense.date == date(2026, 3, 31)
     assert expense.note is None
 
@@ -70,6 +77,13 @@ def test_expense_update_partial():
     update_data = ExpenseUpdate(amount=2000)
     assert update_data.amount == 2000
     assert update_data.category is None
+
+
+def test_expense_update_normalization_food_and_padded():
+    u1 = ExpenseUpdate(category="Food")
+    u2 = ExpenseUpdate(category=" FOOD ")
+    assert u1.category == "food"
+    assert u2.category == "food"
 
 
 @pytest.mark.parametrize("amount", [0, -50])

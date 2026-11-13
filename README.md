@@ -32,6 +32,10 @@ A lightweight REST API built with FastAPI and SQLite for tracking personal expen
 ## Run Tests
 - Run test suite: `.venv\Scripts\pytest`
 
+## CI and Security
+- **CI Jobs:** Test suite (`pytest`), Security (`pip-audit`, `bandit`), Docker smoke test (builds image, checks non-root execution, executes POST and GET).
+- **Dependabot:** Weekly dependency updates.
+
 ## Endpoints
 | Method | Endpoint | Description |
 |---|---|---|

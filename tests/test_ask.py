@@ -18,7 +18,7 @@ def test_command_b_handler(monkeypatch, capsys):
     captured = capsys.readouterr()
     data = json.loads(captured.out.strip())
     assert data["amount"] == 15000
-    assert data["category"] == "Food"
+    assert data["category"] == "food"
     assert data["date"] == "2026-11-10"
     assert data["note"] == "lunch"
 

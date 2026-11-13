@@ -97,8 +97,8 @@ jobs:
         run: |
           RESPONSE=$(curl --max-time 2 -s http://127.0.0.1:8000/expenses/)
           echo "Response: $RESPONSE"
-          if echo "$RESPONSE" | grep -q "Food"; then
-            echo "Found Food in response"
+          if echo "$RESPONSE" | grep -q "food"; then
+            echo "Found lower case food in response"
           else
             echo "Food not found in response"
             exit 1

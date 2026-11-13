@@ -146,7 +146,7 @@ def test_parse_expense_response_valid():
     expense = parse_expense_response(json_text)
     assert isinstance(expense, ExpenseCreate)
     assert expense.amount == 1999
-    assert expense.category == "Food"
+    assert expense.category == "food"
     assert expense.date == date(2026, 11, 8)
     assert expense.note == "lunch"
 
@@ -156,7 +156,7 @@ def test_parse_expense_response_code_fence():
     expense = parse_expense_response(fenced_text)
     assert isinstance(expense, ExpenseCreate)
     assert expense.amount == 1250
-    assert expense.category == "Travel"
+    assert expense.category == "travel"
 
 
 def test_parse_expense_response_invalid_date():

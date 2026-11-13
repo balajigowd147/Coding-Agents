@@ -11,14 +11,13 @@ class ExpenseCreate(BaseModel):
 
     @field_validator("category", mode="before")
     @classmethod
-
     def validate_and_strip_category(cls, v: Any) -> str:
         if not isinstance(v, str):
             raise ValueError("Category must be a string")
         stripped = v.strip()
         if not stripped:
             raise ValueError("Category cannot be empty")
-        return stripped
+        return stripped.lower()
 
     @field_validator("note", mode="before")
     @classmethod
@@ -53,7 +52,7 @@ class ExpenseUpdate(BaseModel):
         stripped = v.strip()
         if not stripped:
             raise ValueError("Category cannot be empty")
-        return stripped
+        return stripped.lower()
 
     @field_validator("date", mode="before")
     @classmethod

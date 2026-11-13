@@ -53,7 +53,7 @@ def list_expenses(
 
     if category is not None:
         query += " AND category = ?"
-        params.append(category)
+        params.append(category.strip().lower() if isinstance(category, str) else category)
 
     if start_date is not None:
         start_str = start_date.isoformat() if isinstance(start_date, date) else str(start_date)
@@ -106,7 +106,7 @@ def monthly_summary(conn: sqlite3.Connection, year: int, month: int) -> Dict[str
     month_prefix = f"{year:04d}-{month:02d}"
     cursor.execute(
         """
-        SELECT category, SUM(amount) as total
+        SELECT LOWER(category) as cat_lower, SUM(amount) as total
         FROM expenses
         WHERE substr(date, 1, 7) = ?
         GROUP BY category
@@ -116,7 +116,7 @@ def monthly_summary(conn: sqlite3.Connection, year: int, month: int) -> Dict[str
     rows = cursor.fetchall()
     summary = {}
     for row in rows:
-        cat = row["category"] if isinstance(row, sqlite3.Row) else row[0]
+        cat = row["cat_lower"] if isinstance(row, sqlite3.Row) else row[0]
         tot = row["total"] if isinstance(row, sqlite3.Row) else row[1]
         summary[cat] = int(tot) if tot is not None else 0
     return summary

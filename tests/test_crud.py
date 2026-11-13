@@ -32,7 +32,7 @@ def test_create_and_get_expense(db_conn):
     expense = create_expense(db_conn, payload)
     assert expense is not None
     assert expense["amount"] == 1200
-    assert expense["category"] == "Food"
+    assert expense["category"] == "food"
     assert expense["date"] == "2026-03-10"
     assert expense["note"] == "Lunch"
     assert "id" in expense
@@ -41,7 +41,7 @@ def test_create_and_get_expense(db_conn):
     assert fetched is not None
     assert fetched["id"] == expense["id"]
     assert fetched["amount"] == 1200
-    assert fetched["category"] == "Food"
+    assert fetched["category"] == "food"
 
 
 def test_get_expense_missing(db_conn):
@@ -61,7 +61,7 @@ def test_list_expenses_with_filters(db_conn):
     # Filter by category
     food_expenses = list_expenses(db_conn, category="Food")
     assert len(food_expenses) == 2
-    assert all(e["category"] == "Food" for e in food_expenses)
+    assert all(e["category"] == "food" for e in food_expenses)
 
     # Filter by date range
     range_expenses = list_expenses(db_conn, start_date=date(2026, 3, 1), end_date=date(2026, 3, 10))
@@ -77,7 +77,7 @@ def test_update_expense(db_conn):
     updated = update_expense(db_conn, expense_id, update_payload)
     assert updated is not None
     assert updated["amount"] == 1250
-    assert updated["category"] == "Groceries"
+    assert updated["category"] == "groceries"
     assert updated["note"] == "Weekly shop"
     assert updated["date"] == "2026-03-05"
 
@@ -89,7 +89,7 @@ def test_update_expense_empty(db_conn):
     updated = update_expense(db_conn, expense_id, ExpenseUpdate())
     assert updated is not None
     assert updated["amount"] == 1000
-    assert updated["category"] == "Groceries"
+    assert updated["category"] == "groceries"
     assert updated["note"] == "Original"
     assert updated["date"] == "2026-03-05"
 
@@ -140,7 +140,7 @@ def test_monthly_summary(db_conn):
     create_expense(db_conn, ExpenseCreate(amount=3000, category="Food", date=date(2026, 4, 1)))
 
     summary = monthly_summary(db_conn, year=2026, month=3)
-    assert summary == {"Food": 1500, "Utilities": 2000}
+    assert summary == {"food": 1500, "utilities": 2000}
 
 
 def test_monthly_summary_boundary_dates(db_conn):
@@ -148,15 +148,22 @@ def test_monthly_summary_boundary_dates(db_conn):
     create_expense(db_conn, ExpenseCreate(amount=222, category="Food", date=date(2027, 1, 1)))
 
     summary_dec = monthly_summary(db_conn, year=2026, month=12)
-    assert summary_dec == {"Food": 111}
+    assert summary_dec == {"food": 111}
 
     summary_jan = monthly_summary(db_conn, year=2027, month=1)
-    assert summary_jan == {"Food": 222}
-
+    assert summary_jan == {"food": 222}
 
 def test_monthly_summary_no_expenses(db_conn):
     summary = monthly_summary(db_conn, year=2026, month=12)
     assert summary == {}
+
+def test_monthly_summary_groups_case_variants(db_conn):
+    create_expense(db_conn, ExpenseCreate(amount=100, category="Food", date=date(2026, 3, 2)))
+    create_expense(db_conn, ExpenseCreate(amount=200, category="food", date=date(2026, 3, 5)))
+    create_expense(db_conn, ExpenseCreate(amount=300, category=" FOOD ", date=date(2026, 3, 10)))
+
+    summary = monthly_summary(db_conn, year=2026, month=3)
+    assert summary == {"food": 600}
 
 
 def test_build_update_sql_valid():

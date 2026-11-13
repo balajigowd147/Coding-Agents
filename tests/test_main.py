@@ -36,7 +36,7 @@ def test_create_expense(client):
     assert response.status_code == 201
     data = response.json()
     assert data["amount"] == 1500
-    assert data["category"] == "Food"
+    assert data["category"] == "food"
     assert data["date"] == "2026-03-10"
     assert data["note"] == "Lunch"
     assert "id" in data
@@ -92,7 +92,19 @@ def test_list_expenses_with_category_filter(client):
     assert response.status_code == 200
     items = response.json()
     assert len(items) == 1
-    assert items[0]["category"] == "Food"
+    assert items[0]["category"] == "food"
+
+
+def test_post_and_get_uppercase_category_filter(client):
+    client.post(
+        "/expenses/",
+        json={"amount": 150, "category": " FOOD ", "date": "2026-03-05"},
+    )
+    response = client.get("/expenses/?category=FOOD")
+    assert response.status_code == 200
+    items = response.json()
+    assert len(items) == 1
+    assert items[0]["category"] == "food"
 
 
 def test_patch_expense(client):
@@ -168,7 +180,7 @@ def test_monthly_summary(client):
     response = client.get("/expenses/summary/monthly?year=2026&month=3")
     assert response.status_code == 200
     summary = response.json()
-    assert summary == {"Food": 1000, "Rent": 2500}
+    assert summary == {"food": 1000, "rent": 2500}
 
 
 def test_patch_expense_null_amount(client):
@@ -232,5 +244,49 @@ def test_health(client):
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_category_normalization_and_filtering(client):
+    create_res = client.post(
+        "/expenses/",
+        json={"amount": 1000, "category": " FOOD ", "date": "2026-03-01"},
+    )
+    assert create_res.status_code == 201
+    assert create_res.json()["category"] == "food"
+
+    expense_id = create_res.json()["id"]
+    patch_res = client.patch(
+        f"/expenses/{expense_id}",
+        json={"category": "Food"},
+    )
+    assert patch_res.status_code == 200
+    assert patch_res.json()["category"] == "food"
+
+    # POST another with "Food"
+    client.post(
+        "/expenses/",
+        json={"amount": 500, "category": "Food", "date": "2026-03-02"},
+    )
+
+    # GET /expenses/?category=FOOD should find both (both normalized to "food")
+    get_res = client.get("/expenses/?category=FOOD")
+    assert get_res.status_code == 200
+    items = get_res.json()
+    assert len(items) == 2
+    for item in items:
+        assert item["category"] == "food"
+
+    # Monthly summary groups "Food" and "food" into one key "food"
+    client.post(
+        "/expenses/",
+        json={"amount": 300, "category": "food", "date": "2026-03-03"},
+    )
+    summary_res = client.get("/expenses/summary/monthly?year=2026&month=3")
+    assert summary_res.status_code == 200
+    summary = summary_res.json()
+    assert "Food" not in summary
+    assert "food" in summary
+    assert summary["food"] == 1000 + 500 + 300
+
 
 
