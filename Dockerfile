@@ -21,7 +21,7 @@ COPY main.py database.py crud.py schemas.py ./
 # Define volume for database storage
 VOLUME ["/data"]
 
-USER appuser
+USER root
 
 EXPOSE 8000
 
