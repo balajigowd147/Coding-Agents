@@ -23,6 +23,7 @@ Personal Expense Tracker API built with FastAPI and SQLite to track income and e
 - **Environment Protection:** Never edit `.env` files directly or commit secrets.
 - **Dependencies:** Always ask the user before installing any new packages.
 - **Targeted Edits:** Prefer small targeted edits over rewriting whole files. Do exactly the step requested, then stop and wait.
+- **Git & File Safety:** Never run `git checkout`, `git restore`, `git reset`, or `git clean` without asking the user first. Never delete files without asking.
 
 ## Commands
 - **Create Virtual Environment:**
