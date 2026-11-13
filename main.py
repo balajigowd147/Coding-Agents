@@ -37,6 +37,11 @@ def create_new_expense(expense: ExpenseCreate, db: sqlite3.Connection = Depends(
     return create_expense(db, expense)
 
 
+@app.get("/health", response_model=dict)
+def health_check():
+    return {"status": "ok"}
+
+
 @app.get("/expenses/", response_model=List[dict])
 def read_expenses(
     category: Optional[str] = None,
